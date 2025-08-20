@@ -4,15 +4,11 @@ import com.embabel.agent.api.annotation.*;
 import com.embabel.agent.api.common.OperationContext;
 import com.embabel.agent.domain.io.UserInput;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.kylehoehns.ecommerce.classification.Intent;
-import com.kylehoehns.ecommerce.classification.Sentiment;
 import com.kylehoehns.ecommerce.inventory.InventoryService;
 import com.kylehoehns.ecommerce.order.Order;
 import com.kylehoehns.ecommerce.order.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
 
 
 @Agent(
@@ -31,12 +27,7 @@ public class CustomerSupportAgent {
         this.inventoryService = inventoryService;
     }
 
-    public enum OperationType {
-        REFUND,
-        REPLACE
-    }
-
-    public record ParsedRequest(String orderId, Intent intent, Sentiment sentiment) {
+    public record ParsedRequest(String orderId, OperationType operationType, Sentiment sentiment) {
     }
 
     public record OrderSearchResult(Order order, boolean orderExists) {
@@ -98,7 +89,7 @@ public class CustomerSupportAgent {
                 adjustmentResponse.operationType().toString().toLowerCase(),
                 adjustmentResponse.originalOrder(),
                 parsedRequest.sentiment(),
-                parsedRequest.intent(),
+                parsedRequest.operationType(),
                 adjustmentResponse.operationType().toString().toLowerCase()
             ), String.class);
 
@@ -113,7 +104,6 @@ public class CustomerSupportAgent {
             originalOrder.id(),
             originalOrder.sku(),
             originalOrder.sku(),
-            originalOrder.quantity(),
             originalOrder.price()
         );
         return new OrderAdjustmentResponse(originalOrder, replacementOrder, OperationType.REPLACE, "Replacement order created");
@@ -122,13 +112,13 @@ public class CustomerSupportAgent {
     @Action(pre = "shouldRefund")
     OrderAdjustmentResponse processRefund(OrderSearchResult searchResult) {
         var order = searchResult.order();
-        var refundMessage = orderService.processRefund(order.id(), order.sku(), order.quantity(), order.price());
+        var refundMessage = orderService.processRefund(order.id(), order.sku(), order.price());
         return new OrderAdjustmentResponse(order, null, OperationType.REFUND, refundMessage);
     }
 
     @Condition(name = "shouldReplace")
     public boolean shouldReplace(ParsedRequest parsedRequest, OrderSearchResult searchResult) {
-        var wantsReplacement = Intent.REPLACEMENT.equals(parsedRequest.intent());
+        var wantsReplacement = OperationType.REPLACE.equals(parsedRequest.operationType());
         boolean hasInventory = inventoryService.getQuantity(searchResult.order().sku()) > 0;
         return hasInventory && wantsReplacement;
     }
@@ -136,12 +126,11 @@ public class CustomerSupportAgent {
     @Condition(name = "shouldRefund")
     public boolean shouldRefund(ParsedRequest parsedRequest, OrderSearchResult searchResult) {
         boolean hasInventory = inventoryService.getQuantity(searchResult.order().sku()) > 0;
-        return Intent.REFUND.equals(parsedRequest.intent()) || !hasInventory;
+        return OperationType.REFUND.equals(parsedRequest.operationType()) || !hasInventory;
     }
 
     @Action(post = {"shouldRefund", "shouldReplace"})
     OrderSearchResult retrieveOrder(ParsedRequest parsedRequest) {
-        log.info("Retrieving order for ID: {}", parsedRequest.orderId());
         return orderService.getOrder(parsedRequest.orderId())
             .map(order -> new OrderSearchResult(order, true))
             .orElse(new OrderSearchResult(null, false));
@@ -149,7 +138,6 @@ public class CustomerSupportAgent {
 
     @Action
     ParsedRequest parseRequest(UserInput userInput, OperationContext context) {
-        log.info("Parsing customer request: {}", userInput.getContent());
         var analysisPrompt = """
             Analyze this customer support request to extract:
             1. Order ID they're referring to

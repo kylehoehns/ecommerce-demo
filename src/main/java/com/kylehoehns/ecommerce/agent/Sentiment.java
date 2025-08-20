@@ -1,4 +1,4 @@
-package com.kylehoehns.ecommerce.classification;
+package com.kylehoehns.ecommerce.agent;
 
 public enum Sentiment {
     POSITIVE,

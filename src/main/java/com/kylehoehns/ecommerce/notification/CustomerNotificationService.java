@@ -11,7 +11,7 @@ public class CustomerNotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerNotificationService.class);
 
-    public void informCustomer(Order order, String message) {
+    public void informCustomer(String message) {
         log.info("Informing customer {}", message);
     }
 }

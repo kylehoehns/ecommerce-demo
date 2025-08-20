@@ -12,6 +12,7 @@ public class InventoryService {
 
     public InventoryService() {
         // seed with sample data
+        stock.put("shirt-s", 0);
         stock.put("shirt-m", 6);
         stock.put("shirt-l", 0);
         stock.put("shirt-xl", 2);

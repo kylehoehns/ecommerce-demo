@@ -40,18 +40,6 @@ public class OrderRestController {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
-    @PutMapping("/{orderId}")
-    public ResponseEntity<?> updateOrder(@PathVariable String orderId, @RequestBody OrderRequest request) {
-        try {
-            var order = orderService.updateOrderWithValidation(orderId, request.sku(), request.quantity(), request.price());
-            return ResponseEntity.ok(order);
-        } catch (OrderService.ValidationException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (OrderService.OrderNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> cancelOrder(@PathVariable String orderId) {
         return orderService.cancelOrder(orderId)
@@ -62,7 +50,7 @@ public class OrderRestController {
     @PostMapping("/{orderId}/refund")
     public ResponseEntity<?> refundOrder(@PathVariable String orderId, @RequestBody RefundRequest request) {
         try {
-            var result = orderService.processRefund(orderId, request.sku(), request.quantity(), request.price());
+            var result = orderService.processRefund(orderId, request.sku(), request.price());
             return ResponseEntity.ok(result);
         } catch (OrderService.ValidationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -72,8 +60,7 @@ public class OrderRestController {
     @PostMapping("/{orderId}/replace")
     public ResponseEntity<?> replaceOrder(@PathVariable String orderId, @RequestBody ReplacementRequest request) {
         try {
-            var order = orderService.processReplacement(orderId, request.originalSku(), request.newSku(),
-                request.quantity(), request.newPrice());
+            var order = orderService.processReplacement(orderId, request.originalSku(), request.newSku(), request.newPrice());
             return ResponseEntity.ok(order);
         } catch (OrderService.ValidationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -85,11 +72,10 @@ public class OrderRestController {
     public record OrderRequest(String sku, int quantity, BigDecimal price) {
     }
 
-    public record RefundRequest(String sku, int quantity, BigDecimal price) {
+    public record RefundRequest(String sku, BigDecimal price) {
     }
 
-    public record ReplacementRequest(String originalSku, String newSku, int quantity,
-                                     BigDecimal newPrice) {
+    public record ReplacementRequest(String originalSku, String newSku, BigDecimal newPrice) {
     }
 }
 

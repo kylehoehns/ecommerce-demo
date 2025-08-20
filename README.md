@@ -76,7 +76,7 @@ curl http://localhost:8080/orders/{order-id}
 - **Service-layer validation** - Business logic and validation centralized in services
 - **RESTful design** - Standard HTTP methods and status codes
 - **Sentiment Analysis** - Agent considers customer emotion when crafting responses
-- **Conditional Logic** - Smart decision making based on inventory and customer intent
+- **Conditional Logic** - Smart decision making based on inventory and customer operationType
 
 ### Setting up MCP Server in Claude Desktop
 

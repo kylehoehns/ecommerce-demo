@@ -10,8 +10,8 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class OrderService {
@@ -20,14 +20,15 @@ public class OrderService {
     private final Map<String, Order> orders = new ConcurrentHashMap<>();
     private final InventoryService inventoryService;
     private final CustomerNotificationService notificationService;
+    private final AtomicLong orderCounter = new AtomicLong(1000);
 
     public OrderService(InventoryService inventoryService, CustomerNotificationService notificationService) {
         this.inventoryService = inventoryService;
         this.notificationService = notificationService;
 
-        // seed orders with some fake
-        orders.put("123", new Order("123", "shirt-l", 1, BigDecimal.ONE));
-        orders.put("456", new Order("456", "shirt-m", 1, BigDecimal.TEN));
+        // seed orders with some fake data
+        orders.put("ORD-123", new Order("ORD-123", "shirt-l", BigDecimal.ONE));
+        orders.put("ORD-456", new Order("ORD-456", "shirt-m", BigDecimal.TEN));
     }
 
     public static class ValidationException extends RuntimeException {
@@ -55,6 +56,10 @@ public class OrderService {
         }
     }
 
+    private String generateOrderId() {
+        return "ORD-" + orderCounter.incrementAndGet();
+    }
+
     private void validateOrderData(String sku, int quantity, BigDecimal price) {
         if (sku == null || sku.isBlank()) {
             throw new ValidationException("SKU is required");
@@ -76,73 +81,57 @@ public class OrderService {
         }
 
         inventoryService.remove(sku, quantity);
-        var orderId = UUID.randomUUID().toString();
-        var order = createOrder(orderId, sku, quantity, price);
+        var orderId = generateOrderId();
+        var order = createOrder(orderId, sku, price);
 
         var message = "Order " + orderId + " created successfully for " + quantity + " units of " + sku + " at $" + price + " each";
-        notificationService.informCustomer(order, message);
+        notificationService.informCustomer(message);
 
         return order;
     }
 
-    public Order updateOrderWithValidation(String orderId, String sku, int quantity, BigDecimal price) {
-        validateOrderData(sku, quantity, price);
-
-        var updatedOrder = updateOrder(orderId, sku, quantity, price);
-        if (updatedOrder.isEmpty()) {
-            throw new OrderNotFoundException("Order not found");
-        }
-        return updatedOrder.get();
-    }
-
-    public String processRefund(String orderId, String sku, int quantity, BigDecimal price) {
+    public String processRefund(String orderId, String sku, BigDecimal price) {
         if (sku == null || sku.isBlank()) {
             throw new ValidationException("SKU is required");
         }
-        if (quantity <= 0) {
-            throw new ValidationException("Quantity must be positive");
-        }
 
-        inventoryService.add(sku, quantity);
-        var originalOrder = new Order(orderId, sku, quantity, price);
+        inventoryService.add(sku, 1);
+        var originalOrder = new Order(orderId, sku, price);
         issueRefund(originalOrder);
 
-        var message = "Refund processed for order " + orderId + ". " + quantity + " units of " + sku + " returned to inventory";
-        notificationService.informCustomer(originalOrder, message);
+        var message = "Refund processed for order " + orderId + ". One " + sku + " returned to inventory";
+        notificationService.informCustomer(message);
 
         return "Refund processed successfully";
     }
 
-    public Order processReplacement(String orderId, String originalSku, String newSku, int quantity, BigDecimal newPrice) {
+    public Order processReplacement(String orderId, String originalSku, String newSku, BigDecimal newPrice) {
         if (originalSku == null || originalSku.isBlank()) {
             throw new ValidationException("Original SKU is required");
         }
         if (newSku == null || newSku.isBlank()) {
             throw new ValidationException("New SKU is required");
         }
-        if (quantity <= 0) {
-            throw new ValidationException("Quantity must be positive");
-        }
 
         var newStock = inventoryService.getQuantity(newSku);
-        if (newStock < quantity) {
+        if (newStock <= 0) {
             throw new InsufficientInventoryException("Insufficient inventory for replacement", newStock);
         }
 
-        inventoryService.add(originalSku, quantity);
-        inventoryService.remove(newSku, quantity);
+        inventoryService.add(originalSku, 1);
+        inventoryService.remove(newSku, 1);
 
-        var replacementOrder = new Order(UUID.randomUUID().toString(), newSku, quantity, newPrice);
+        var replacementOrder = new Order(generateOrderId(), newSku, newPrice);
         createReplacementOrder(replacementOrder);
 
-        var message = "Replacement order created for " + orderId + ". Exchanging " + quantity + " units of " + originalSku + " for " + newSku;
-        notificationService.informCustomer(replacementOrder, message);
+        var message = "Replacement order created for " + orderId + ". Exchanging one " + originalSku + " for " + newSku;
+        notificationService.informCustomer(message);
 
         return replacementOrder;
     }
 
-    public Order createOrder(String orderId, String sku, int quantity, BigDecimal price) {
-        Order order = new Order(orderId, sku, quantity, price);
+    public Order createOrder(String orderId, String sku, BigDecimal price) {
+        Order order = new Order(orderId, sku, price);
         orders.put(orderId, order);
         return order;
     }
@@ -153,15 +142,6 @@ public class OrderService {
 
     public Collection<Order> getAllOrders() {
         return orders.values();
-    }
-
-    public Optional<Order> updateOrder(String orderId, String sku, int quantity, BigDecimal price) {
-        if (!orders.containsKey(orderId)) {
-            return Optional.empty();
-        }
-        Order updatedOrder = new Order(orderId, sku, quantity, price);
-        orders.put(orderId, updatedOrder);
-        return Optional.of(updatedOrder);
     }
 
     public boolean cancelOrder(String orderId) {
@@ -175,5 +155,6 @@ public class OrderService {
 
     public void issueRefund(Order order) {
         logger.info("Issuing refund for order {}", order.id());
+        orders.remove(order.id());
     }
 }
