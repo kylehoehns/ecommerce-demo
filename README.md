@@ -1,6 +1,6 @@
 ## E‑commerce Demo
 
-A Spring Boot application demonstrating e-commerce domain services with clean service layer architecture.
+A Spring Boot application demonstrating how to add AI-powered customer support to existing Java applications. Shows how to integrate agentic behavior into traditional CRUD applications without requiring a complete tech stack migration.
 
 ### Architecture
 
@@ -23,6 +23,9 @@ Built with **Java 21** and designed for maintainability:
 
 - **Notifications** (`src/main/java/com/khoehns/ecommerce/notification/`) –
   Customer communication service for order updates.
+
+- **Customer Support Agent** (`src/main/java/com/khoehns/ecommerce/agent/`) –
+  AI-powered agent that handles customer refund and replacement requests by analyzing sentiment, checking inventory, and processing orders automatically.
 
 ### API Endpoints
 
@@ -66,11 +69,14 @@ curl http://localhost:8080/orders/{order-id}
 
 ### Features
 
+- **AI-Powered Customer Support** - Intelligent agent handles refunds and replacements automatically
 - **In-memory persistence** - Orders and inventory persist during application runtime
 - **Automatic inventory management** - Stock levels update with order operations
 - **Thread-safe operations** - Uses `ConcurrentHashMap` for concurrent access
 - **Service-layer validation** - Business logic and validation centralized in services
 - **RESTful design** - Standard HTTP methods and status codes
+- **Sentiment Analysis** - Agent considers customer emotion when crafting responses
+- **Conditional Logic** - Smart decision making based on inventory and customer intent
 
 ### Setting up MCP Server in Claude Desktop
 
