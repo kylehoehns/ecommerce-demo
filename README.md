@@ -71,3 +71,22 @@ curl http://localhost:8080/orders/{order-id}
 - **Thread-safe operations** - Uses `ConcurrentHashMap` for concurrent access
 - **Service-layer validation** - Business logic and validation centralized in services
 - **RESTful design** - Standard HTTP methods and status codes
+
+### Setting up MCP Server in Claude Desktop
+
+Add this to your claude_desktop_config.json file
+
+```json
+{
+  "mcpServers": {
+    "customer-support": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://localhost:8080/sse"
+      ]
+    }
+  }
+}
+```

@@ -1,9 +1,6 @@
 package com.kylehoehns.ecommerce.agent;
 
-import com.embabel.agent.api.annotation.AchievesGoal;
-import com.embabel.agent.api.annotation.Action;
-import com.embabel.agent.api.annotation.Agent;
-import com.embabel.agent.api.annotation.Condition;
+import com.embabel.agent.api.annotation.*;
 import com.embabel.agent.api.common.OperationContext;
 import com.embabel.agent.domain.io.UserInput;
 import com.kylehoehns.ecommerce.classification.Intent;
@@ -18,7 +15,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 
-@Agent(description = "Assists customers with information about getting refunds or replacements for orders they've made")
+@Agent(name = "Customer Support Agent", description = "Assists customers with information about getting refunds or replacements for orders they've made")
 public class CustomerSupportAgent {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerSupportAgent.class);
@@ -43,7 +40,10 @@ public class CustomerSupportAgent {
         UNKNOWN
     }
 
-    @AchievesGoal(description = "Handles the refund or replacement of an order for a customer")
+    @AchievesGoal(
+        description = "Handles the refund or replacement of an order for a customer",
+        export = @Export(name = "completeAdjustment", remote = true, startingInputTypes = {UserInput.class})
+    )
     @Action
     OrderAdjustmentResponse2 completeAdjustment(OrderAdjustmentResponse orderAdjustmentResponse,
                                                 OrderSearchResult searchResult,
@@ -56,7 +56,8 @@ public class CustomerSupportAgent {
         return new OrderAdjustmentResponse2(orderAdjustmentResponse.order(), orderAdjustmentResponse.operationType(), customerResponse.message());
     }
 
-    record CustomerResponse(String message) { }
+    record CustomerResponse(String message) {
+    }
 
     @Action
     CustomerResponse createCustomerResponse(OrderAdjustmentResponse oar, OperationContext context, ParsedRequest parsedRequest) {
