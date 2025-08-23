@@ -41,24 +41,12 @@ GET http://localhost:8080/api/orders
 ###
 
 ### Get specific order (replace with actual order ID from previous responses)
-GET http://localhost:8080/api/orders/991adf2c-1d83-4ada-8c56-de766b30dca2
-
-###
-
-### Update an order (replace with actual order ID)
-PUT http://localhost:8080/api/orders/991adf2c-1d83-4ada-8c56-de766b30dca2
-Content-Type: application/json
-
-{
-  "sku": "shirt-m",
-  "quantity": 3,
-  "price": 25.99
-}
+GET http://localhost:8080/api/orders/ORD-1001
 
 ###
 
 ### Process a refund (replace with actual order ID)
-POST http://localhost:8080/api/orders/991adf2c-1d83-4ada-8c56-de766b30dca2/refund
+POST http://localhost:8080/api/orders/ORD-1001/refund
 Content-Type: application/json
 
 {
@@ -70,7 +58,7 @@ Content-Type: application/json
 ###
 
 ### Create a replacement order (replace with actual order ID)
-POST http://localhost:8080/api/orders/991adf2c-1d83-4ada-8c56-de766b30dca2/replace
+POST http://localhost:8080/api/orders/ORD-123/replace
 Content-Type: application/json
 
 {
@@ -84,12 +72,7 @@ Content-Type: application/json
 ###
 
 ### Cancel an order (replace with actual order ID)
-DELETE http://localhost:8080/api/orders/991adf2c-1d83-4ada-8c56-de766b30dca2
-
-###
-
-### Add inventory
-POST http://localhost:8080/api/inventory/shirt-l?quantity=5
+DELETE http://localhost:8080/api/orders/ORD-123
 
 ###
 
