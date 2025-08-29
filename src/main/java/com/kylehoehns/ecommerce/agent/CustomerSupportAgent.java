@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 )
 public class CustomerSupportAgent {
 
-    private static final Logger log = LoggerFactory.getLogger(CustomerSupportAgent.class);
-
     private final OrderService orderService;
     private final InventoryService inventoryService;
 
@@ -67,23 +65,23 @@ public class CustomerSupportAgent {
         var customerMessage = context.promptRunner()
             .createObject("""
                 You are a customer support representative informing a customer that their order has been %s.
-                
+
                 Order details:
                 %s
-                
+
                 Customer's original sentiment: %s
                 Customer requested: %s
                 Action taken: %s
-                
+
                 If the customer requested a replacement but the system processed a refund, it was due to inventory limitations.
-                
+
                 Create a professional response that acknowledges their sentiment and shares in frustration if negative.
                 Keep it under 100 words.
-                
+
                 Standard timelines:
                 - Replacements ship within 1-3 business days
                 - Refunds appear on card within 1 business day
-                
+
                 Company name: ACME
                 """.formatted(
                 adjustmentResponse.operationType().toString().toLowerCase(),
@@ -101,10 +99,7 @@ public class CustomerSupportAgent {
     OrderAdjustmentResponse processReplacement(OrderSearchResult searchResult) {
         var originalOrder = searchResult.order();
         var replacementOrder = orderService.processReplacement(
-            originalOrder.id(),
-            originalOrder.sku(),
-            originalOrder.sku(),
-            originalOrder.price()
+            originalOrder.id()
         );
         return new OrderAdjustmentResponse(originalOrder, replacementOrder, OperationType.REPLACE, "Replacement order created");
     }
@@ -112,7 +107,7 @@ public class CustomerSupportAgent {
     @Action(pre = "shouldRefund")
     OrderAdjustmentResponse processRefund(OrderSearchResult searchResult) {
         var order = searchResult.order();
-        var refundMessage = orderService.processRefund(order.id(), order.sku(), order.price());
+        var refundMessage = orderService.processRefund(order.id());
         return new OrderAdjustmentResponse(order, null, OperationType.REFUND, refundMessage);
     }
 
@@ -143,7 +138,7 @@ public class CustomerSupportAgent {
             1. Order ID they're referring to
             2. Whether they want a REFUND or REPLACEMENT
             3. Their emotional sentiment (POSITIVE, NEUTRAL, or NEGATIVE)
-            
+
             Customer request: %s
             """.formatted(userInput.getContent());
 

@@ -2,5 +2,5 @@ package com.kylehoehns.ecommerce.order;
 
 import java.math.BigDecimal;
 
-public record Order(String id, String sku, BigDecimal price) {
+public record Order(String id, String sku) {
 }

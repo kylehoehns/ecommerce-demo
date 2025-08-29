@@ -4,12 +4,14 @@
 ### Check current inventory
 GET http://localhost:8080/api/inventory
 
-###
-
 ### Get specific inventory item
 GET http://localhost:8080/api/inventory/shirt-m
 
-###
+### List all orders
+GET http://localhost:8080/api/orders
+
+### Get specific order
+GET http://localhost:8080/api/orders/ORD-123
 
 ### Create a new order
 POST http://localhost:8080/api/orders
@@ -17,64 +19,19 @@ Content-Type: application/json
 
 {
   "sku": "shirt-m",
-  "quantity": 2,
-  "price": 25.99
 }
 
-###
-
-### Create another order
-POST http://localhost:8080/api/orders
+### Process a refund
+POST http://localhost:8080/api/orders/ORD-123/refund
 Content-Type: application/json
 
-{
-  "sku": "shirt-xl",
-  "quantity": 1,
-  "price": 27.99
-}
 
-###
-
-### List all orders
-GET http://localhost:8080/api/orders
-
-###
-
-### Get specific order (replace with actual order ID from previous responses)
-GET http://localhost:8080/api/orders/ORD-1001
-
-###
-
-### Process a refund (replace with actual order ID)
-POST http://localhost:8080/api/orders/ORD-1001/refund
+### Create a replacement order
+POST http://localhost:8080/api/orders/ORD-456/replace
 Content-Type: application/json
-
-{
-  "sku": "shirt-m",
-  "quantity": 2,
-  "price": 25.99
-}
-
-###
-
-### Create a replacement order (replace with actual order ID)
-POST http://localhost:8080/api/orders/ORD-123/replace
-Content-Type: application/json
-
-{
-  "originalSku": "shirt-m",
-  "newSku": "shirt-xl",
-  "quantity": 1,
-  "originalPrice": 25.99,
-  "newPrice": 27.99
-}
-
-###
 
 ### Cancel an order (replace with actual order ID)
 DELETE http://localhost:8080/api/orders/ORD-123
-
-###
 
 ### Remove inventory
 DELETE http://localhost:8080/api/inventory/shirt-m?quantity=1
@@ -88,7 +45,6 @@ Content-Type: application/json
 {
   "sku": "",
   "quantity": 2,
-  "price": 25.99
 }
 
 ###
@@ -100,7 +56,6 @@ Content-Type: application/json
 {
   "sku": "shirt-m",
   "quantity": -1,
-  "price": 25.99
 }
 
 ###
@@ -112,7 +67,6 @@ Content-Type: application/json
 {
   "sku": "shirt-l",
   "quantity": 10,
-  "price": 25.99
 }
 
 ###

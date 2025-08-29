@@ -19,7 +19,7 @@ public class OrderRestController {
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest request) {
         try {
-            var order = orderService.createOrderWithValidation(request.sku(), request.quantity(), request.price());
+            var order = orderService.createOrderWithValidation(request.sku(), request.quantity());
             return ResponseEntity.status(HttpStatus.CREATED).body(order);
         } catch (OrderService.ValidationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -48,19 +48,21 @@ public class OrderRestController {
     }
 
     @PostMapping("/{orderId}/refund")
-    public ResponseEntity<?> refundOrder(@PathVariable String orderId, @RequestBody RefundRequest request) {
+    public ResponseEntity<?> refundOrder(@PathVariable String orderId) {
         try {
-            var result = orderService.processRefund(orderId, request.sku(), request.price());
+            var result = orderService.processRefund(orderId);
             return ResponseEntity.ok(result);
+        } catch (OrderService.OrderNotFoundException e) {
+            return ResponseEntity.notFound().build();
         } catch (OrderService.ValidationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/{orderId}/replace")
-    public ResponseEntity<?> replaceOrder(@PathVariable String orderId, @RequestBody ReplacementRequest request) {
+    public ResponseEntity<?> replaceOrder(@PathVariable String orderId) {
         try {
-            var order = orderService.processReplacement(orderId, request.originalSku(), request.newSku(), request.newPrice());
+            var order = orderService.processReplacement(orderId);
             return ResponseEntity.ok(order);
         } catch (OrderService.ValidationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -69,13 +71,10 @@ public class OrderRestController {
         }
     }
 
-    public record OrderRequest(String sku, int quantity, BigDecimal price) {
+    public record OrderRequest(String sku, int quantity) {
     }
 
-    public record RefundRequest(String sku, BigDecimal price) {
-    }
-
-    public record ReplacementRequest(String originalSku, String newSku, BigDecimal newPrice) {
+    public record ReplacementRequest(String originalSku) {
     }
 }
 
