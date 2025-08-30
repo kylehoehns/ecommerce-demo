@@ -27,20 +27,20 @@ public class InventoryService {
         return stock.getOrDefault(sku, 0);
     }
 
-    public int add(String sku, int qty) {
-        if (sku == null || sku.isBlank() || qty <= 0)  {
+    public int add(String sku) {
+        if (sku == null || sku.isBlank())  {
             return stock.getOrDefault(sku, 0);
         }
-        return stock.merge(sku, qty, Integer::sum);
+        return stock.merge(sku, 1, Integer::sum);
     }
 
 
-    public int remove(String sku, int qty) {
-        if (sku == null || sku.isBlank() || qty <= 0) {
+    public int remove(String sku) {
+        if (sku == null || sku.isBlank()) {
             return stock.getOrDefault(sku, 0);
         }
         int current = stock.getOrDefault(sku, 0);
-        int newQty = Math.max(0, current - qty);
+        int newQty = Math.max(0, current - 1);
         if (newQty == 0) {
             stock.remove(sku);
         } else {

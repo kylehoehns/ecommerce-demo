@@ -19,7 +19,7 @@ public class InventoryRestController {
     public record InventoryItem(String sku, int qty) {
     }
 
-    public record InventoryMutation(String sku, int qty) {
+    public record InventoryMutation(String sku) {
     }
 
     @GetMapping
@@ -38,19 +38,19 @@ public class InventoryRestController {
 
     @PostMapping("/add")
     public ResponseEntity<InventoryItem> add(@RequestBody InventoryMutation req) {
-        if (req.qty() <= 0 || req.sku() == null || req.sku().isBlank()) {
+        if (req.sku() == null || req.sku().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-        int newQty = inventoryService.add(req.sku(), req.qty());
+        int newQty = inventoryService.add(req.sku());
         return ResponseEntity.ok(new InventoryItem(req.sku(), newQty));
     }
 
     @PostMapping("/remove")
     public ResponseEntity<InventoryItem> remove(@RequestBody InventoryMutation req) {
-        if (req.qty() <= 0 || req.sku() == null || req.sku().isBlank()) {
+        if (req.sku() == null || req.sku().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-        int newQty = inventoryService.remove(req.sku(), req.qty());
+        int newQty = inventoryService.remove(req.sku());
         return ResponseEntity.ok(new InventoryItem(req.sku(), newQty));
     }
 

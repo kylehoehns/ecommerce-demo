@@ -19,7 +19,7 @@ public class OrderRestController {
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest request) {
         try {
-            var order = orderService.createOrderWithValidation(request.sku(), request.quantity());
+            var order = orderService.createOrderWithValidation(request.sku());
             return ResponseEntity.status(HttpStatus.CREATED).body(order);
         } catch (OrderService.ValidationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -71,10 +71,8 @@ public class OrderRestController {
         }
     }
 
-    public record OrderRequest(String sku, int quantity) {
+    public record OrderRequest(String sku) {
     }
 
-    public record ReplacementRequest(String originalSku) {
-    }
 }
 

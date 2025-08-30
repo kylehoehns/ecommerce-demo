@@ -18,7 +18,7 @@ POST http://localhost:8080/api/orders
 Content-Type: application/json
 
 {
-  "sku": "shirt-m",
+  "sku": "shirt-m"
 }
 
 ### Process a refund
@@ -27,11 +27,11 @@ Content-Type: application/json
 
 
 ### Create a replacement order
-POST http://localhost:8080/api/orders/ORD-456/replace
+POST http://localhost:8080/api/orders/ORD-1002/replace
 Content-Type: application/json
 
 ### Cancel an order (replace with actual order ID)
-DELETE http://localhost:8080/api/orders/ORD-123
+DELETE http://localhost:8080/api/orders/ORD-456
 
 ### Remove inventory
 DELETE http://localhost:8080/api/inventory/shirt-m?quantity=1

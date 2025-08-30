@@ -60,28 +60,25 @@ public class OrderService {
         return "ORD-" + orderCounter.incrementAndGet();
     }
 
-    private void validateOrderData(String sku, int quantity) {
+    private void validateOrderData(String sku) {
         if (sku == null || sku.isBlank()) {
             throw new ValidationException("SKU is required");
         }
-        if (quantity <= 0) {
-            throw new ValidationException("Quantity must be positive");
-        }
     }
 
-    public Order createOrderWithValidation(String sku, int quantity) {
-        validateOrderData(sku, quantity);
+    public Order createOrderWithValidation(String sku) {
+        validateOrderData(sku);
 
         var currentStock = inventoryService.getQuantity(sku);
-        if (currentStock < quantity) {
+        if (currentStock < 1) {
             throw new InsufficientInventoryException("Insufficient inventory", currentStock);
         }
 
-        inventoryService.remove(sku, quantity);
+        inventoryService.remove(sku);
         var orderId = generateOrderId();
         var order = createOrder(orderId, sku);
 
-        var message = "Order " + orderId + " created successfully for " + quantity + " units of " + sku;
+        var message = "Order " + orderId + " created successfully for 1 units of " + sku;
         notificationService.informCustomer(message);
 
         return order;
@@ -90,7 +87,7 @@ public class OrderService {
     public String processRefund(String orderId) {
         var originalOrder = getOrder(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
 
-        inventoryService.add(originalOrder.sku(), 1);
+        inventoryService.add(originalOrder.sku());
         issueRefund(originalOrder);
 
         var message = "Refund processed for order " + orderId + ". One " + originalOrder.sku() + " returned to inventory";
@@ -106,7 +103,7 @@ public class OrderService {
             throw new InsufficientInventoryException("Insufficient inventory for replacement", newStock);
         }
 
-        inventoryService.remove(order.sku(), 1);
+        inventoryService.remove(order.sku());
 
         var replacementOrder = new Order(generateOrderId(), order.sku());
         createReplacementOrder(replacementOrder);

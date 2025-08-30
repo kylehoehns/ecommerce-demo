@@ -7,9 +7,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.kylehoehns.ecommerce.inventory.InventoryService;
 import com.kylehoehns.ecommerce.order.Order;
 import com.kylehoehns.ecommerce.order.OrderService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 @Agent(
     name = "Customer Support Agent",
