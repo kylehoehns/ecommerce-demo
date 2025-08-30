@@ -51,6 +51,12 @@ The application will start on port 8080.
 You can interact with the agent in two ways:
 
 **Option A: Using the Interactive Shell**
+
+To use the shell version, you need to modify the Application.java file:
+1. Comment out `@EnableAgentMcpServer` on line 10
+2. Uncomment `@EnableAgentShell` on line 11
+
+Then run:
 ```bash
 ./scripts/shell.sh
 ```
