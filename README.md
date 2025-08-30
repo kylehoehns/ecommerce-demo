@@ -141,7 +141,7 @@ Then restart Claude Desktop and you can chat with the customer support agent dir
 ```
 src/main/java/com/kylehoehns/ecommerce/
 ├── agent/
-│   ├── CustomerSupportAgent.java    # Main embabel agent
+│   ├── CustomerSupportAgent.java   # Main embabel agent
 │   ├── OperationType.java          # REFUND/REPLACE enum
 │   └── Sentiment.java              # POSITIVE/NEUTRAL/NEGATIVE enum
 ├── order/                          # Order management services
